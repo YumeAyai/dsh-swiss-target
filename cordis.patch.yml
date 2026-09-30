@@ -1,0 +1,11 @@
+# The swiss-target-batch bundle patch: one row over dsh-base + dsh-web-app.
+#
+# The row names this package's ROOT, because the Client module scanner of DSH
+# 0.1.2+ attributes a browser half only to a row naming an exact package, and
+# the composed entry id is that package name — which is the id
+# `client.js` registers itself under. The Host half registers the
+# `swiss_target_batch` tool; the Client half renders the SwissTarget panel and
+# drives the same implementation through the `/swiss` session command.
+- insert:
+    - id: swiss-target-batch
+      name: '@yumeayai/dsh-swiss-target'

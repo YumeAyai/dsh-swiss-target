@@ -1,0 +1,65 @@
+{
+  "name": "@yumeayai/dsh-swiss-target",
+  "version": "0.1.0",
+  "description": "SwissTargetPrediction batch prediction for DeepSeek Harness: submit SMILES strings, retrieve predicted protein targets (UniProt/ChEMBL ids, probability scores, known actives) and export them to CSV, through a swiss_target_batch tool, a /swiss command, and a Web panel.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "icon": "./icon.svg",
+  "files": [
+    "index.js",
+    "lib/**/*.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "SKILL.md",
+    "scripts/**/*.mjs",
+    "README.md",
+    "README_zh.md",
+    "LICENSE"
+  ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YumeAyai/dsh-swiss-target.git"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "plugin",
+    "skill",
+    "agent-skill",
+    "swisstargetprediction",
+    "smiles",
+    "target-prediction",
+    "cheminformatics"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  }
+}

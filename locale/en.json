@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "SwissTargetPrediction batch",
+    "description": "Predict protein targets for SMILES batches and browse the results in a SwissTarget panel."
+  }
+}
