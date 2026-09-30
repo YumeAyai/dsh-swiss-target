@@ -1,0 +1,8 @@
+node_modules/
+plugin-*.tgz
+*.log
+.plugin-diag.log
+.verify/
+.publish/
+swiss_target_results.csv
+.DS_Store

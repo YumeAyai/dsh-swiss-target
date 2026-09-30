@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SwissTargetPrediction batch">
+  <circle cx="32" cy="32" r="30" fill="#0f766e"/>
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#99f6e4" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M32 18 L44 25 L44 39 L32 46 L20 39 L20 25 Z" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="32" cy="18" r="3.2" fill="#ffffff"/>
+  <circle cx="44" cy="25" r="3.2" fill="#ffffff"/>
+  <circle cx="44" cy="39" r="3.2" fill="#ffffff"/>
+  <circle cx="32" cy="46" r="3.2" fill="#ffffff"/>
+  <circle cx="20" cy="39" r="3.2" fill="#ffffff"/>
+  <circle cx="20" cy="25" r="3.2" fill="#ffffff"/>
+</svg>

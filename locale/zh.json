@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "SwissTargetPrediction 批量预测",
+    "description": "对一批 SMILES 分子预测蛋白靶点，并在 SwissTarget 面板中查看结果。"
+  }
+}
