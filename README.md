@@ -1,5 +1,12 @@
 # SwissTargetPrediction batch prediction — DeepSeek Harness plugin & agent skill
 
+![SwissTarget — SMILES in, targets out](docs/media/social-cover-en.png)
+
+**SMILES in. Targets out.** Batch target predictions, salt preprocessing, and CSV export for DeepSeek Harness.
+
+[Interface screenshots & media kit](docs/PROMOTION.md) · [Local interactive demo](demo/README.md)
+
+
 [English](README.md) | [中文](README_zh.md)
 
 Want to know which proteins a molecule — or a whole series — might act on? Hand it
@@ -13,6 +20,12 @@ and ChEMBL ids, target class, probability, and the known actives behind each tar
 > [Swiss Institute of Bioinformatics (SIB)](https://www.sib.swiss/). Please
 > respect their server usage policies. If the predictions go into research, cite
 > Daina, Michielin & Zoete, *Nucleic Acids Research* 47(W1), W357–W364 (2019).
+
+## Interface preview
+
+![English results panel](docs/media/panel-en.png)
+
+> Screenshots render the actual panel component in an isolated demo with illustrative data, not live service predictions.
 
 ## What you get
 

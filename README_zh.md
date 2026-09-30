@@ -1,5 +1,12 @@
 # SwissTargetPrediction 批量预测 —— DeepSeek Harness 插件与 Agent Skill
 
+![SwissTarget — SMILES in, targets out](docs/media/social-cover.png)
+
+**从分子出发，让靶点更清晰。** 为 DeepSeek Harness 提供批量靶点预测、盐型预处理和 CSV 导出。
+
+[界面截图与宣传素材](docs/PROMOTION.md) · [本地交互演示](demo/README.md)
+
+
 [English](README.md) | [中文](README_zh.md)
 
 想知道一个分子——或一整批分子——可能作用在哪些蛋白上？把 SMILES 交给它。它会逐个提交到
@@ -10,6 +17,20 @@
 > **注意**：本工具**非官方**，与[瑞士生物信息研究所（SIB）](https://www.sib.swiss/) 无关，
 > 请遵守对方的服务使用政策。若预测结果用于研究，请引用 Daina, Michielin & Zoete,
 > *Nucleic Acids Research* 47(W1), W357–W364 (2019)。
+
+## 界面预览
+
+![中文结果面板](docs/media/panel-zh.png)
+
+<details><summary>深色主题与手机界面</summary>
+
+![深色主题](docs/media/panel-dark.png)
+
+<img src="docs/media/panel-mobile.png" width="390" alt="手机界面" />
+
+</details>
+
+> 截图来自实际面板组件的独立演示环境，使用示例数据，并非实时服务预测。
 
 ## 能做什么
 

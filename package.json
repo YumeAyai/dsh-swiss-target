@@ -40,5 +40,14 @@
         "@deepseek-ai/dsh-client-ui-conversation"
       ]
     }
+  },
+  "scripts": {
+    "build:demo": "node scripts/build-demo.mjs",
+    "check": "node --check client.js && node --check index.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   }
 }

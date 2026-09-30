@@ -62,9 +62,12 @@ window.__ModuleLoader__.load({
       'form.clear': 'Clear',
       'state.noSession': 'Open a session to run predictions.',
       'state.empty': 'Paste at least one SMILES string to start.',
-      'state.idle': 'No batch has run in this panel yet.',
+      'state.idle': 'Your next discovery starts with a molecule. Paste SMILES above to begin.',
       'progress.title': 'Running batch — {count} molecule(s), {elapsed}s elapsed',
       'progress.note': 'Molecules are submitted one at a time and each job is polled until it finishes, so 5–60 s per molecule is normal. Keep this view or session open; switching away is safe, the run continues.',
+      'stats.molecules': 'Molecules completed',
+      'stats.rows': 'Predicted targets',
+      'stats.time': 'Elapsed seconds',
       'summary.molecules': '{succeeded}/{requested} molecules',
       'summary.rows': '{count} predictions',
       'summary.csv': 'CSV: {path}',
@@ -97,9 +100,12 @@ window.__ModuleLoader__.load({
       'form.clear': '清空',
       'state.noSession': '请先打开一个会话再运行预测。',
       'state.empty': '请至少粘贴一个 SMILES。',
-      'state.idle': '本面板还没有运行过批量预测。',
+      'state.idle': '从一个分子，开启下一步探索。粘贴 SMILES 即可开始。',
       'progress.title': '正在运行 · {count} 个分子 · 已用时 {elapsed}s',
       'progress.note': '逐个分子提交并轮询，单个分子 5–60 秒属正常；切到别的标签页或会话不会中断，回来仍能看到进度和结果。',
+      'stats.molecules': '完成分子',
+      'stats.rows': '预测结果',
+      'stats.time': '用时 / 秒',
       'summary.molecules': '成功 {succeeded}/{requested} 个分子',
       'summary.rows': '{count} 条预测',
       'summary.csv': 'CSV：{path}',
@@ -123,42 +129,57 @@ window.__ModuleLoader__.load({
 
     /** Panel styles; theme tokens only so light/dark follow the Host. */
     const STYLES = `
-.dsh-swiss-root { display: flex; flex-direction: column; gap: 12px; padding: 16px 20px 28px; height: 100%; box-sizing: border-box; overflow: auto; color: var(--dsw-alias-label-primary); font-size: 13px; }
-.dsh-swiss-title { font-size: 15px; font-weight: 600; margin: 0; }
-.dsh-swiss-description { color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 1.6; margin: 0; }
-.dsh-swiss-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.dsh-swiss-label { color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 18px; }
-.dsh-swiss-control { display: flex; align-items: center; gap: 8px; min-height: 33px; }
-.dsh-swiss-input, .dsh-swiss-select, .dsh-swiss-number { background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); border: 1px solid var(--dsw-alias-border-l2); border-radius: 6px; padding: 6px 8px; font-size: 13px; font-family: inherit; box-sizing: border-box; height: 33px; }
-.dsh-swiss-input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; height: auto; min-height: 96px; line-height: 1.5; }
-.dsh-swiss-input:focus, .dsh-swiss-select:focus, .dsh-swiss-number:focus { outline: none; border-color: var(--dsw-alias-state-business-primary); }
-.dsh-swiss-input:disabled, .dsh-swiss-select:disabled, .dsh-swiss-number:disabled { color: var(--dsw-alias-label-tertiary); }
-.dsh-swiss-controls { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
-.dsh-swiss-actions { display: flex; gap: 8px; align-items: center; min-height: 33px; }
-.dsh-swiss-button { background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); border: 1px solid var(--dsw-alias-border-l2); border-radius: 6px; padding: 6px 14px; height: 33px; box-sizing: border-box; font-size: 13px; font-family: inherit; cursor: pointer; }
-.dsh-swiss-button:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); }
-.dsh-swiss-button:disabled { color: var(--dsw-alias-label-tertiary); cursor: not-allowed; }
-.dsh-swiss-button.dsh-swiss-primary { border-color: var(--dsw-alias-state-business-primary); color: var(--dsw-alias-state-business-primary); }
-.dsh-swiss-hint { color: var(--dsw-alias-label-tertiary); font-size: 12px; }
-.dsh-swiss-progress { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; background: var(--dsw-alias-bg-base); }
-.dsh-swiss-progressHead { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--dsw-alias-label-primary); }
-.dsh-swiss-spinner { flex: none; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--dsw-alias-border-l3); border-top-color: var(--dsw-alias-state-business-primary); animation: dsh-swiss-spin 0.8s linear infinite; }
-.dsh-swiss-progressTrack { height: 4px; border-radius: 2px; overflow: hidden; background: var(--dsw-alias-border-l1); }
-.dsh-swiss-progressBar { height: 100%; width: 35%; border-radius: 2px; background: var(--dsw-alias-state-business-primary); animation: dsh-swiss-slide 1.4s ease-in-out infinite; }
-@keyframes dsh-swiss-spin { to { transform: rotate(360deg); } }
-@keyframes dsh-swiss-slide { from { margin-left: -35%; } to { margin-left: 100%; } }
-@media (prefers-reduced-motion: reduce) { .dsh-swiss-spinner { animation: none; } .dsh-swiss-progressBar { width: 100%; animation: none; } }
-.dsh-swiss-error { border: 1px solid var(--dsw-alias-state-error-primary); color: var(--dsw-alias-state-error-primary); border-radius: 6px; padding: 8px 10px; font-size: 12px; white-space: pre-wrap; }
-.dsh-swiss-summary { color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 1.7; }
-.dsh-swiss-tableWrap { border: 1px solid var(--dsw-alias-border-l1); border-radius: 8px; overflow: auto; max-height: 60vh; }
-.dsh-swiss-table { border-collapse: collapse; width: 100%; font-size: 12px; }
-.dsh-swiss-table th, .dsh-swiss-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--dsw-alias-border-l1); white-space: nowrap; }
-.dsh-swiss-table th { position: sticky; top: 0; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-secondary); font-weight: 500; z-index: 1; }
-.dsh-swiss-table tbody tr:hover { background: var(--dsw-alias-interactive-bg-hover); }
-.dsh-swiss-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dsw-alias-label-secondary); }
-.dsh-swiss-failures { color: var(--dsw-alias-state-error-primary); font-size: 12px; line-height: 1.7; }
-.dsh-swiss-conversions { color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 1.7; }
-.dsh-swiss-conversions code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--dsw-alias-label-primary); }
+ .dsh-swiss-root { --swiss-accent: var(--dsw-alias-state-business-primary, #087f8c); display:flex; flex-direction:column; gap:18px; padding:28px; height:100%; box-sizing:border-box; overflow:auto; color:var(--dsw-alias-label-primary); font:13px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--dsw-alias-bg-base); }
+.dsh-swiss-hero { display:flex; align-items:center; gap:18px; padding-bottom:20px; border-bottom:1px solid var(--dsw-alias-border-l1); }
+.dsh-swiss-mark { display:grid; place-items:center; width:58px; height:58px; flex:none; border-radius:18px; color:var(--swiss-accent); background:color-mix(in srgb,var(--swiss-accent) 10%,transparent); }
+.dsh-swiss-eyebrow { color:var(--swiss-accent); font-size:10px; font-weight:700; letter-spacing:2px; margin-bottom:4px; }
+.dsh-swiss-title { font-size:25px; font-weight:650; letter-spacing:-.8px; margin:0 0 5px; line-height:1.3; }
+.dsh-swiss-description { color:var(--dsw-alias-label-tertiary); font-size:12px; line-height:1.7; margin:0; max-width:760px; }
+.dsh-swiss-field { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.dsh-swiss-label { color:var(--dsw-alias-label-secondary); font-size:12px; font-weight:600; }
+.dsh-swiss-control { display:flex; align-items:center; gap:8px; }
+.dsh-swiss-input,.dsh-swiss-select { background:var(--dsw-alias-bg-base); color:var(--dsw-alias-label-primary); border:1px solid var(--dsw-alias-border-l2); border-radius:10px; padding:10px 14px; font:inherit; box-sizing:border-box; }
+.dsh-swiss-input { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; resize:vertical; min-height:140px; line-height:1.9; background:color-mix(in srgb,var(--swiss-accent) 3%,var(--dsw-alias-bg-base)); }
+.dsh-swiss-select { height:42px; min-width:190px; }
+.dsh-swiss-input:focus,.dsh-swiss-select:focus { outline:2px solid color-mix(in srgb,var(--swiss-accent) 25%,transparent); outline-offset:2px; border-color:var(--swiss-accent); }
+.dsh-swiss-controls { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:flex-end; }
+.dsh-swiss-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.dsh-swiss-button { background:var(--dsw-alias-bg-base); color:var(--dsw-alias-label-primary); border:1px solid var(--dsw-alias-border-l2); border-radius:10px; padding:9px 18px; min-height:42px; font-size:12px; font-weight:600; line-height:1.6; font-family:inherit; cursor:pointer; transition:background .15s,transform .15s; }
+.dsh-swiss-button:hover:not(:disabled) { background:var(--dsw-alias-interactive-bg-hover); transform:translateY(-1px); }
+.dsh-swiss-button:focus-visible { outline:2px solid var(--swiss-accent); outline-offset:3px; }
+.dsh-swiss-button:disabled { opacity:.45; cursor:not-allowed; }
+.dsh-swiss-button.dsh-swiss-primary { background:var(--swiss-accent); border-color:var(--swiss-accent); color:var(--dsw-alias-bg-base); }
+.dsh-swiss-button.dsh-swiss-primary:hover:not(:disabled) { background:color-mix(in srgb,var(--swiss-accent) 85%,var(--dsw-alias-label-primary)); }
+.dsh-swiss-hint { color:var(--dsw-alias-label-tertiary); font-size:12px; }
+.dsh-swiss-empty { text-align:center; padding:32px 20px; border:1px dashed var(--dsw-alias-border-l2); border-radius:14px; color:var(--dsw-alias-label-tertiary); }
+.dsh-swiss-progress { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--dsw-alias-border-l1); border-radius:12px; }
+.dsh-swiss-progressHead { display:flex; align-items:center; gap:10px; font-weight:600; }
+.dsh-swiss-spinner { flex:none; width:14px; height:14px; border-radius:50%; border:2px solid var(--dsw-alias-border-l2); border-top-color:var(--swiss-accent); animation:dsh-swiss-spin .8s linear infinite; }
+.dsh-swiss-progressTrack { height:5px; border-radius:3px; overflow:hidden; background:var(--dsw-alias-border-l1); }
+.dsh-swiss-progressBar { height:100%; width:35%; border-radius:3px; background:var(--swiss-accent); animation:dsh-swiss-slide 1.4s ease-in-out infinite; }
+@keyframes dsh-swiss-spin { to { transform:rotate(360deg); } }
+@keyframes dsh-swiss-slide { from { margin-left:-35%; } to { margin-left:100%; } }
+@media(prefers-reduced-motion:reduce) { .dsh-swiss-spinner,.dsh-swiss-progressBar { animation:none; } .dsh-swiss-button { transition:none; } }
+.dsh-swiss-error,.dsh-swiss-failures { border:1px solid var(--dsw-alias-state-error-primary); color:var(--dsw-alias-state-error-primary); border-radius:10px; padding:12px 16px; font-size:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.dsh-swiss-summary { color:var(--dsw-alias-label-secondary); font-size:12px; }
+.dsh-swiss-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
+.dsh-swiss-stat { border:1px solid var(--dsw-alias-border-l1); border-radius:12px; padding:14px 18px; }
+.dsh-swiss-stat strong { display:block; font-size:24px; font-weight:650; letter-spacing:-.6px; color:var(--dsw-alias-label-primary); }
+.dsh-swiss-tableWrap { border:1px solid var(--dsw-alias-border-l1); border-radius:12px; overflow:auto; max-height:60vh; }
+.dsh-swiss-table { border-collapse:collapse; width:100%; font-size:12px; }
+.dsh-swiss-table th,.dsh-swiss-table td { text-align:left; padding:12px 16px; border-bottom:1px solid var(--dsw-alias-border-l1); white-space:nowrap; }
+.dsh-swiss-table th { position:sticky; top:0; background:var(--dsw-alias-bg-base); color:var(--dsw-alias-label-tertiary); font-size:11px; font-weight:600; z-index:1; }
+.dsh-swiss-table tbody tr:hover { background:var(--dsw-alias-interactive-bg-hover); }
+.dsh-swiss-table tbody tr:last-child td { border-bottom:0; }
+.dsh-swiss-table td:first-child { font-weight:600; }
+.dsh-swiss-mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--dsw-alias-label-secondary); }
+.dsh-swiss-probability { display:inline-flex; align-items:center; gap:9px; font-variant-numeric:tabular-nums; }
+.dsh-swiss-probabilityTrack { width:48px; height:5px; border-radius:3px; overflow:hidden; background:var(--dsw-alias-border-l1); }
+.dsh-swiss-probabilityFill { display:block; height:100%; background:var(--swiss-accent); border-radius:3px; }
+.dsh-swiss-conversions { color:var(--dsw-alias-label-secondary); font-size:12px; padding:14px 18px; border-radius:12px; background:color-mix(in srgb,var(--swiss-accent) 5%,transparent); overflow-wrap:anywhere; }
+.dsh-swiss-conversions code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--dsw-alias-label-primary); }
+@media(max-width:600px) { .dsh-swiss-root { padding:18px; gap:14px; } .dsh-swiss-title { font-size:20px; } .dsh-swiss-mark { width:44px; height:44px; border-radius:12px; } .dsh-swiss-hero { gap:12px; align-items:flex-start; } .dsh-swiss-stats { gap:6px; } .dsh-swiss-stat { padding:10px; } .dsh-swiss-stat strong { font-size:20px; } .dsh-swiss-select { width:100%; } }
+
 `
 
     /**
@@ -342,9 +363,11 @@ window.__ModuleLoader__.load({
       return h(React.Fragment, null,
         h('style', null, STYLES),
         h('div', { className: 'dsh-swiss-root' },
-          h('div', null,
+          h('div', { className: 'dsh-swiss-hero' },
+            h('div', { className: 'dsh-swiss-mark', 'aria-hidden': true }, h('svg', { width: 32, height: 32, viewBox: '0 0 32 32', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7 }, h('path', { d: 'M16 3 27 9.5v13L16 29 5 22.5v-13Z M16 3v12m11-5.5-11 6-11-6m11 6V29' }), h('circle', { cx: 16, cy: 15.5, r: 3, fill: 'currentColor' }))),
+            h('div', null, h('div', { className: 'dsh-swiss-eyebrow' }, 'MOLECULE → TARGET'),
             h('h2', { className: 'dsh-swiss-title' }, translate(t, 'panel.title')),
-            h('p', { className: 'dsh-swiss-description' }, translate(t, 'panel.description')),
+            h('p', { className: 'dsh-swiss-description' }, translate(t, 'panel.description'))),
           ),
           h('div', { className: 'dsh-swiss-field' },
             h('label', { className: 'dsh-swiss-label', htmlFor: 'dsh-swiss-smiles' }, translate(t, 'form.smiles')),
@@ -360,9 +383,10 @@ window.__ModuleLoader__.load({
           ),
           h('div', { className: 'dsh-swiss-controls' },
             h('div', { className: 'dsh-swiss-field' },
-              h('label', { className: 'dsh-swiss-label' }, translate(t, 'form.organism')),
+              h('label', { className: 'dsh-swiss-label', htmlFor: 'dsh-swiss-organism' }, translate(t, 'form.organism')),
               h('div', { className: 'dsh-swiss-control' },
                 h('select', {
+                  id: 'dsh-swiss-organism',
                   className: 'dsh-swiss-select',
                   value: state.organism,
                   disabled: state.busy,
@@ -395,7 +419,7 @@ window.__ModuleLoader__.load({
             ),
           ),
           state.busy
-            ? h('div', { className: 'dsh-swiss-progress' },
+            ? h('div', { className: 'dsh-swiss-progress', role: 'status' },
               h('div', { className: 'dsh-swiss-progressHead' },
                 h('span', { className: 'dsh-swiss-spinner', 'aria-hidden': true }),
                 translate(t, 'progress.title', { count: smiles.length, elapsed }),
@@ -410,12 +434,12 @@ window.__ModuleLoader__.load({
                   ? translate(t, 'state.empty')
                   : translate(t, 'form.count', { count: smiles.length }),
             ),
-          state.error === '' ? null : h('div', { className: 'dsh-swiss-error' }, `${translate(t, 'error.title')}: ${state.error}`),
+          state.error === '' ? null : h('div', { className: 'dsh-swiss-error', role: 'alert' }, `${translate(t, 'error.title')}: ${state.error}`),
           state.result === null
-            ? (state.busy ? null : h('div', { className: 'dsh-swiss-hint' }, translate(t, 'state.idle')))
+            ? (state.busy ? null : h('div', { className: 'dsh-swiss-empty' }, translate(t, 'state.idle')))
             : h(React.Fragment, null,
               h('div', { className: 'dsh-swiss-summary' },
-                `${translate(t, 'summary.molecules', { succeeded: state.result.succeeded, requested: state.result.requested })} · ${translate(t, 'summary.rows', { count: rows.length })} · ${(state.result.elapsedMs / 1000).toFixed(1)}s`,
+                h('div', { className: 'dsh-swiss-stats' }, [[`${state.result.succeeded}/${state.result.requested}`, 'stats.molecules'], [rows.length, 'stats.rows'], [(state.result.elapsedMs / 1000).toFixed(1), 'stats.time']].map(([value, label]) => h('div', { key: label, className: 'dsh-swiss-stat' }, h('strong', null, value), translate(t, label)))),
                 state.result.csvPath ? h('div', null, translate(t, 'summary.csv', { path: state.result.csvPath })) : null,
                 state.result.csvError ? h('div', null, translate(t, 'summary.csvFailed', { reason: state.result.csvError })) : null,
               ),
@@ -430,7 +454,7 @@ window.__ModuleLoader__.load({
                     }, column.key === 'actives'
                       ? `${row.knownActives3d}/${row.knownActives2d}`
                       : column.key === 'probability'
-                        ? Number(row.probability).toFixed(4)
+                        ? h('span', { className: 'dsh-swiss-probability' }, Number(row.probability).toFixed(4), h('span', { className: 'dsh-swiss-probabilityTrack', 'aria-hidden': true }, h('span', { className: 'dsh-swiss-probabilityFill', style: { width: `${Math.max(0, Math.min(1, Number(row.probability) || 0)) * 100}%` } })))
                         : String(row[column.key] ?? '')))))),
                 ),
               ),
