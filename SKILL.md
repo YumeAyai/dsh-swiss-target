@@ -100,7 +100,7 @@ molecule) whenever the user might read the list as exhaustive.
 
 | Symptom | Cause | Action |
 |---|---|---|
-| `the service returned no job … after 3 attempts` | throttled, or the SMILES is not a molecule the service accepts | retry later; check the SMILES first |
+| `no prediction job after 3 attempts` | the service throttles bursts per address (a molecule it refuses answers identically) | stop every other request to swisstargetprediction.ch — no curl, no browser — wait about a minute, then call `swiss_target_batch` again with the same molecules. Only a second failure means the SMILES is the problem. Never reimplement the request by hand: the extra traffic is what caused the throttling |
 | `job N returned no prediction within Ns` | prediction still running | raise `timeout_seconds` and resubmit |
 | CSV path missing / `csvError` set | unwritable destination | pass an `output_csv` inside the session workspace |
 | Empty table for one molecule | the service returned no target for it | check the SMILES; nothing was filtered client-side |

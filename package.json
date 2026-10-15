@@ -1,6 +1,6 @@
 {
   "name": "@yumeayai/dsh-swiss-target",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SwissTargetPrediction batch prediction for DeepSeek Harness: submit SMILES strings, retrieve predicted protein targets (UniProt/ChEMBL ids, probability scores, known actives) and export them to CSV, through a swiss_target_batch tool, a /swiss command, and a Web panel.",
   "type": "module",
   "main": "./index.js",

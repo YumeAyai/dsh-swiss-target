@@ -62,12 +62,10 @@ function normalizeOptionName(name) {
 }
 
 const TOOL_DESCRIPTION = [
-  'Predict protein targets of small molecules with the SwissTargetPrediction web service, in batch.',
-  'Submit one SMILES per molecule, wait for each prediction job, and return the predicted targets with UniProt and ChEMBL ids, target class, probability, and the number of known actives (3D/2D).',
-  'Use it for target fishing and off-target hypotheses; results are predictions, not experimental evidence.',
-  'The service refuses anything that reads as more than one molecule, so salt forms are converted before submission: counter-ions (chloride, sodium, potassium, …) are dropped, the largest fragment is kept from a mixture, and simple charges are neutralised; every change is reported back.',
-  `The service returns at most its top 100 targets per molecule and throttles bursts, so one call submits at most ${BATCH_DEFAULTS.maxMolecules} molecules with a polite delay in between.`,
-  `Results are also written to a CSV in the session workspace (default ${DEFAULT_CSV_NAME}).`,
+  'Predict the protein targets of small molecules with SwissTargetPrediction, in batch. This tool is the SwissTargetPrediction client for this session: it submits each SMILES, waits for the prediction jobs, and returns the targets with UniProt and ChEMBL ids, target class, probability, and known actives (3D/2D). Pass the SMILES exactly as you have them — salt forms, counter-ions and mixtures are converted to the single molecule the service accepts, and every conversion is reported back.',
+  'Use it for any question that needs target prediction: target fishing, off-target and polypharmacology hypotheses, receptor or ligand relationships. Do not reproduce it yourself with curl, bash or browser automation, and do not re-derive SMILES by hand from a name: the service throttles bursts per IP address, so requests sent outside this tool compete with the batch it is already running and make the throttling worse.',
+  `One call submits at most ${BATCH_DEFAULTS.maxMolecules} molecules, the service answers with at most its top 100 targets per molecule, and each molecule is already retried three times about ten seconds apart. When a molecule still reports no prediction job, the service is throttling this address: send no other request to swisstargetprediction.ch, wait about a minute, and call this tool again with the same molecules — they go through on the retry. (A molecule the service genuinely refuses answers the same way, so treat a SMILES as bad only when a retry after the pause fails too.)`,
+  `The full table is also written to a CSV in the session workspace (default ${DEFAULT_CSV_NAME}); report its path and analyse that file instead of querying the service again.`,
 ].join(' ')
 
 /**
@@ -82,7 +80,7 @@ const TOOL_PARAMETERS = {
     smiles: {
       type: 'array',
       items: { type: 'string' },
-      description: 'SMILES strings, one per molecule. Split large sets into several calls.',
+      description: 'SMILES strings, one per molecule, exactly as you have them — salt forms and mixtures are converted automatically. Split large sets into several calls.',
     },
     organism: {
       type: 'string',
@@ -95,7 +93,7 @@ const TOOL_PARAMETERS = {
     },
     timeout_seconds: {
       type: 'number',
-      description: `Seconds to wait for one molecule's prediction; default ${BATCH_DEFAULTS.timeoutMs / 1000}.`,
+      description: `Seconds to wait for one molecule's prediction; default ${BATCH_DEFAULTS.timeoutMs / 1000}. Raise to 240 or more when the service is slow under load.`,
     },
     poll_interval_seconds: {
       type: 'number',
@@ -103,7 +101,7 @@ const TOOL_PARAMETERS = {
     },
     delay_seconds: {
       type: 'number',
-      description: `Polite pause between two submissions; default ${BATCH_DEFAULTS.delayMs / 1000}. Do not set 0.`,
+      description: `Polite pause between two submissions; default ${BATCH_DEFAULTS.delayMs / 1000}. Raise to 4–10 when the service is throttling; never set 0.`,
     },
   },
   required: ['smiles'],
