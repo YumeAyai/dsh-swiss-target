@@ -10,8 +10,18 @@ name: publish
 # missing and its asset is uploaded with --clobber, and npm is skipped when the
 # version already exists.
 #
-# Needs one repository secret: NPM_TOKEN — an npm *automation* (or granular with
-# read+write) token for a maintainer of @yumeayai/dsh-swiss-target.
+# The npm credential is either of these — the job uses whichever is configured:
+#
+# 1. **Trusted publishing (no secret).** On npmjs.com, open the package →
+#    Settings → Trusted publishing → add this repository
+#    (YumeAyai/dsh-swiss-target) and the workflow file name (publish.yml).
+#    npm then exchanges the run's OIDC token for a short-lived credential;
+#    provenance is implied.
+# 2. **A repository secret `NPM_TOKEN`** — an npm *automation* token, or a
+#    granular token with read+write on @yumeayai/dsh-swiss-target, added under
+#    Settings → Secrets and variables → Actions → New repository secret.
+#
+# Trusted publishing needs npm 11.5+, which is why this job pins Node 24.
 on:
   push:
     tags: ['v*']
@@ -40,16 +50,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - name: Check the npm token is configured
+      - name: Which npm credential will be used
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::add the NPM_TOKEN repository secret (npm automation token with publish rights for @yumeayai)"
-            exit 1
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
+            echo "::notice::publishing with the NPM_TOKEN repository secret"
+          else
+            echo "::notice::no NPM_TOKEN secret — expecting npm trusted publishing for this repository and workflow; if the publish step fails with 401/EOTP, add the secret or configure trusted publishing"
           fi
 
       - name: Resolve the tag and the manifest version
@@ -95,6 +106,11 @@ jobs:
           version="${{ steps.version.outputs.version }}"
           if npm view "@yumeayai/dsh-swiss-target@$version" version >/dev/null 2>&1; then
             echo "::notice::@yumeayai/dsh-swiss-target@$version is already on npm — nothing to publish"
-          else
+            exit 0
+          fi
+          if [ -n "$NODE_AUTH_TOKEN" ]; then
             npm publish --access public --provenance
+          else
+            # trusted publishing: npm exchanges the run's OIDC token itself
+            npm publish --access public
           fi
