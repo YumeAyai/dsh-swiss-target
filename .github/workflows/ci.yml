@@ -1,0 +1,34 @@
+name: ci
+
+# Runs on every push to main and every pull request: syntax, the offline smoke
+# test, and a pack dry-run so a manifest that cannot ship fails here.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Syntax check every shipped file
+        run: |
+          for file in index.js client.js lib/*.js scripts/*.mjs test/*.mjs; do
+            node --check "$file"
+          done
+
+      - name: Smoke test (offline, no dependencies)
+        run: node test/smoke.mjs
+
+      - name: The package must pack
+        run: npm pack --dry-run

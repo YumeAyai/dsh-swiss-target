@@ -1,0 +1,100 @@
+name: publish
+
+# One tag is the whole release: bump `version` in package.json, commit, then
+#   git tag v0.1.1 && git push origin v0.1.1
+#
+# The job verifies the tag matches the manifest, runs the checks, builds
+# `dsh-swiss-target.tar.gz`, publishes the GitHub release with that asset (the
+# URL the README tells people to install from), and only then publishes the same
+# version to npm. Every step is re-runnable: the release is created only if it is
+# missing and its asset is uploaded with --clobber, and npm is skipped when the
+# version already exists.
+#
+# Needs one repository secret: NPM_TOKEN — an npm *automation* (or granular with
+# read+write) token for a maintainer of @yumeayai/dsh-swiss-target.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to (re)publish, for example v0.1.1
+        required: true
+
+permissions:
+  contents: write # create the GitHub release and upload the asset
+  id-token: write # npm provenance attestation
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Check the npm token is configured
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::add the NPM_TOKEN repository secret (npm automation token with publish rights for @yumeayai)"
+            exit 1
+          fi
+
+      - name: Resolve the tag and the manifest version
+        id: version
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          version="$(node -p "require('./package.json').version")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "releasing $tag (manifest $version)"
+          if [ "v$version" != "$tag" ]; then
+            echo "::error::tag $tag does not match package.json version $version"
+            exit 1
+          fi
+
+      - name: Syntax check every shipped file
+        run: |
+          for file in index.js client.js lib/*.js scripts/*.mjs test/*.mjs; do
+            node --check "$file"
+          done
+
+      - name: Smoke test (offline, no dependencies)
+        run: node test/smoke.mjs
+
+      - name: Build the release tarball
+        run: |
+          npm pack
+          mv "yumeayai-dsh-swiss-target-${{ steps.version.outputs.version }}.tgz" dsh-swiss-target.tar.gz
+          tar -tzf dsh-swiss-target.tar.gz | sort
+
+      - name: Publish the GitHub release with the tarball
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" --generate-notes
+          gh release upload "$tag" dsh-swiss-target.tar.gz --clobber
+
+      - name: Publish to npm (skipped when the version already exists)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          if npm view "@yumeayai/dsh-swiss-target@$version" version >/dev/null 2>&1; then
+            echo "::notice::@yumeayai/dsh-swiss-target@$version is already on npm — nothing to publish"
+          else
+            npm publish --access public --provenance
+          fi

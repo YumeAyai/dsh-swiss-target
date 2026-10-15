@@ -6,3 +6,4 @@ plugin-*.tgz
 .publish/
 swiss_target_results.csv
 .DS_Store
+dsh-swiss-target*.tar.gz

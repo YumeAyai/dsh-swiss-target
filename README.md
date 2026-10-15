@@ -2,6 +2,10 @@
 
 [English](README.md) | [中文](README_zh.md)
 
+[![npm](https://img.shields.io/npm/v/@yumeayai/dsh-swiss-target)](https://www.npmjs.com/package/@yumeayai/dsh-swiss-target)
+[![npm downloads](https://img.shields.io/npm/dm/@yumeayai/dsh-swiss-target)](https://www.npmjs.com/package/@yumeayai/dsh-swiss-target)
+[![release downloads](https://img.shields.io/github/downloads/YumeAyai/dsh-swiss-target/total)](https://github.com/YumeAyai/dsh-swiss-target/releases)
+
 Want to know which proteins a molecule — or a whole series — might act on? Hand it
 the SMILES. It submits each one to
 [SwissTargetPrediction](https://www.swisstargetprediction.ch/), waits for the
@@ -35,9 +39,10 @@ and ChEMBL ids, target class, probability, and the known actives behind each tar
 
 ## Install
 
-Into a Harness profile, straight from a release — nothing to clone:
+From npm, or from a release — nothing to clone:
 
 ```bash
+dsh plugin --profile <profile> add @yumeayai/dsh-swiss-target
 dsh plugin --profile <profile> add https://github.com/YumeAyai/dsh-swiss-target/releases/latest/download/dsh-swiss-target.tar.gz
 ```
 

@@ -2,6 +2,10 @@
 
 [English](README.md) | [中文](README_zh.md)
 
+[![npm](https://img.shields.io/npm/v/@yumeayai/dsh-swiss-target)](https://www.npmjs.com/package/@yumeayai/dsh-swiss-target)
+[![npm downloads](https://img.shields.io/npm/dm/@yumeayai/dsh-swiss-target)](https://www.npmjs.com/package/@yumeayai/dsh-swiss-target)
+[![release downloads](https://img.shields.io/github/downloads/YumeAyai/dsh-swiss-target/total)](https://github.com/YumeAyai/dsh-swiss-target/releases)
+
 想知道一个分子——或一整批分子——可能作用在哪些蛋白上？把 SMILES 交给它。它会逐个提交到
 [SwissTargetPrediction](https://www.swisstargetprediction.ch/)，等服务算完，把结果整理成一张表：
 靶点名、基因名、UniProt 与 ChEMBL 编号、靶点类别、概率，以及每个靶点已有的已知活性数（3D/2D）。
@@ -26,9 +30,10 @@
 
 ## 安装
 
-装进某个 profile。直接从 release 装，不用克隆：
+装进某个 profile。从 npm 装，或直接从 release 装，都不用克隆：
 
 ```bash
+dsh plugin --profile <profile> add @yumeayai/dsh-swiss-target
 dsh plugin --profile <profile> add https://github.com/YumeAyai/dsh-swiss-target/releases/latest/download/dsh-swiss-target.tar.gz
 ```
 
